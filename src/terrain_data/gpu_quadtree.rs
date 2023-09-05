@@ -114,12 +114,24 @@ pub(crate) fn initialize_gpu_quadtree(
 ) {
     for terrain in terrain_query.iter() {
         for view in view_query.iter() {
-            let quadtree = quadtrees.get(&(terrain, view)).unwrap();
 
-            gpu_quadtrees.insert(
-                (terrain, view),
-                GpuQuadtree::new(&device, &mut images, quadtree),
-            );
+          //  let quadtree = quadtrees.get(&(terrain, view)).unwrap();
+
+            match quadtrees.get(&(terrain, view)){
+                Some(tree) => {
+                    gpu_quadtrees.insert(
+                        (terrain, view),
+                        GpuQuadtree::new(&device, &mut images, tree),
+                    );
+                },
+                None => {
+                    println!("WARN: Could not initialize gpu quadtree");
+                }
+            }
+
+            
+
+
         }
     }
 }

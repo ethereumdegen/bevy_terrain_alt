@@ -27,3 +27,12 @@ bytemuck = "1.10"
 anyhow = "1.0"
 bincode = "2.0.0-rc.1"
 dolly = "0.4"
+
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[[example]]
+name = "advanced"
+path = "examples/advanced.rs"
