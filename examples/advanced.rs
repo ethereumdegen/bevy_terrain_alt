@@ -34,11 +34,11 @@ fn main() {
             watch_for_changes: true, // enable hot reloading for shader easy customization
             ..default()
         }))
-        .add_plugin(TerrainPlugin {
+        .add_plugins(TerrainPlugin {
             attachment_count: 3, // has to match the attachments of the terrain
         })
-        .add_plugin(TerrainDebugPlugin)
-        .add_plugin(TerrainMaterialPlugin::<TerrainMaterial>::default())
+        .add_plugins(TerrainDebugPlugin)
+        .add_plugins(TerrainMaterialPlugin::<TerrainMaterial>::default())
         .add_systems(Update,create_array_texture)
         .add_systems(Startup,setup)
         .add_systems(Update,toggle_camera)

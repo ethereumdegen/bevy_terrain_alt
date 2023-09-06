@@ -67,9 +67,9 @@ pub struct TDFPlugin;
 
 impl Plugin for TDFPlugin {
     fn build(&self, app: &mut App) {
-      
+        app.add_asset_loader(TDFAssetLoader);
     }
     fn finish(&self, app: &mut App) {
-        app.add_asset_loader(TDFAssetLoader);
+     
     }
 }
