@@ -157,6 +157,12 @@ impl Default for TerrainPlugin {
 
 impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
+       
+
+        
+    }
+    fn finish(&self, app: &mut App) {
+
         add_shader(app);
 
         app.add_plugin(TDFPlugin)
@@ -176,11 +182,7 @@ impl Plugin for TerrainPlugin {
                 )
                    
             );
-
-        
-    }
-    fn finish(&self, app: &mut App) {
-
+            
 
         let render_app = app
             .sub_app_mut(RenderApp)

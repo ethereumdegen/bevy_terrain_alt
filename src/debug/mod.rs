@@ -13,6 +13,8 @@ pub struct TerrainDebugPlugin;
 
 impl Plugin for TerrainDebugPlugin {
     fn build(&self, app: &mut App) {
+    }
+    fn finish(&self, app: &mut App) {
         app.init_resource::<DebugTerrain>()
             .add_systems(Update,debug_camera_control)
             .add_systems(Update,toggle_debug)
