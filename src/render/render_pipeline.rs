@@ -421,6 +421,11 @@ where
         // Todo: don't use MaterialPlugin, but do the configuration here
         app.add_plugin(MaterialPlugin::<M>::default());
 
+        
+    }
+
+    fn finish(&self, app: &mut App) {
+        
         if let Ok(render_app) = app.get_sub_app_mut(RenderApp) {
             render_app
                 // .init_resource::<ExtractedMaterials<M>>()
@@ -433,7 +438,8 @@ where
                 .add_render_command::<Opaque3d, DrawTerrain<M>>()
                 .init_resource::<TerrainRenderPipeline<M>>()
                 .init_resource::<SpecializedRenderPipelines<TerrainRenderPipeline<M>>>()
-                .add_system(queue_terrain::<M>.in_set(RenderSet::Queue));
+                .add_systems(bevy::render::Render,queue_terrain::<M>.in_set(RenderSet::Queue));
         }
     }
+
 }

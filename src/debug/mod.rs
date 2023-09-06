@@ -14,13 +14,13 @@ pub struct TerrainDebugPlugin;
 impl Plugin for TerrainDebugPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<DebugTerrain>()
-            .add_system(debug_camera_control)
-            .add_system(toggle_debug)
-            .add_system(change_config);
+            .add_systems(Update,debug_camera_control)
+            .add_systems(Update,toggle_debug)
+            .add_systems(Update,change_config);
 
         app.sub_app_mut(RenderApp)
             .init_resource::<DebugTerrain>()
-            .add_system(extract_debug.in_schedule(ExtractSchedule));
+            .add_systems(ExtractSchedule,extract_debug );
     }
 }
 
