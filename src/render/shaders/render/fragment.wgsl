@@ -1,5 +1,12 @@
 #define_import_path bevy_terrain::fragment
 
+
+#import bevy_terrain::functions FragmentInput,FragmentOutput,calculate_blend,lookup_fragment_data
+
+#import bevy_terrain::node   lookup_node 
+
+ 
+
 // The terrain data required by your `fragment_color` function.
 // This data will be fetched from the atlases by means of the `AtlasLookup`.
 // To smoothen the transition between different lods the fragment data will be blended at the fringe between them.

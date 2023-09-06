@@ -1,4 +1,33 @@
 #define_import_path bevy_terrain::functions
+#import bevy_pbr::mesh_view_bindings    view 
+#import bevy_terrain::types TerrainConfig,TerrainViewConfig,Tile,TileList
+ 
+#import bevy_terrain::node NodeLookup, lookup_node, approximate_world_position
+
+
+
+#import bevy_pbr::pbr_functions
+
+// terrain view bindings
+@group(1) @binding(0)
+var<uniform> view_config: TerrainViewConfig;
+@group(1) @binding(1)
+var quadtree: texture_2d_array<u32>;
+@group(1) @binding(2)
+var<storage> tiles: TileList;
+
+// terrain bindings
+@group(2) @binding(0)
+var<uniform> config: TerrainConfig;
+@group(2) @binding(1)
+var atlas_sampler: sampler;
+@group(2) @binding(2)
+var height_atlas: texture_2d_array<f32>;
+@group(2) @binding(3)
+var minmax_atlas: texture_2d_array<f32>;
+
+
+
 
 struct VertexInput {
     @builtin(instance_index) instance: u32,
@@ -47,7 +76,82 @@ struct Blend {
     ratio: f32,
 }
 
-fn calculate_blend(world_position: vec4<f32>) -> Blend {
+
+
+
+struct FragmentData {
+    world_normal: vec3<f32>,
+    debug_color: vec4<f32>,
+}
+
+fn vertex_height(lookup: NodeLookup) -> f32 {
+    let height_coords = lookup.atlas_coords * config.height_scale + config.height_offset;
+    let height = textureSampleLevel(height_atlas, atlas_sampler, height_coords, lookup.atlas_index, 0.0).x;
+
+    return height * config.height;
+}
+
+fn blend_fragment_data(data1: FragmentData, data2: FragmentData, blend_ratio: f32) -> FragmentData {
+    let world_normal = mix(data2.world_normal, data1.world_normal, blend_ratio);
+    let debug_color = mix(data2.debug_color, data1.debug_color, blend_ratio);
+
+    return FragmentData(world_normal, debug_color);
+}
+
+fn process_fragment(input: FragmentInput, data: FragmentData) -> Fragment {
+    let do_discard = input.local_position.x < 2.0 || input.local_position.x > f32(config.terrain_size) - 2.0 ||
+                     input.local_position.y < 2.0 || input.local_position.y > f32(config.terrain_size) - 2.0;
+
+    var color = mix(data.debug_color, vec4<f32>(input.debug_color.xyz, 1.0), input.debug_color.w);
+
+#ifdef LIGHTING
+    var pbr_input: PbrInput = pbr_input_new();
+    pbr_input.material.base_color = color;
+    pbr_input.material.perceptual_roughness = 1.0;
+    pbr_input.material.reflectance = 0.0;
+    pbr_input.frag_coord = input.frag_coord;
+    pbr_input.world_position = input.world_position;
+    pbr_input.world_normal = data.world_normal;
+    pbr_input.is_orthographic = view.projection[3].w == 1.0;
+    pbr_input.N = data.world_normal;
+    pbr_input.V = calculate_view(input.world_position, pbr_input.is_orthographic);
+    color = pbr(pbr_input);
+#endif
+
+    return Fragment(color, do_discard);
+}
+
+
+
+fn lookup_fragment_data(input: FragmentInput, lookup: NodeLookup, ddx: vec2<f32>, ddy: vec2<f32>) -> FragmentData {
+    let atlas_lod = lookup.atlas_lod;
+    let atlas_index = lookup.atlas_index;
+    let atlas_coords = lookup.atlas_coords;
+    let ddx = ddx / f32(1u << atlas_lod);
+    let ddy = ddy / f32(1u << atlas_lod);
+
+    let height_coords = atlas_coords * config.height_scale + config.height_offset;
+    let height_ddx = ddx / 512.0;
+    let height_ddy = ddy / 512.0;
+
+    let world_normal = calculate_normal(height_coords, atlas_index, atlas_lod, height_ddx, height_ddy);
+
+    var debug_color = vec4<f32>(0.5);
+
+#ifdef SHOW_LOD
+    debug_color = mix(debug_color, show_lod(atlas_lod, input.world_position.xyz), 0.4);
+#endif
+
+#ifdef SHOW_UV
+    debug_color = mix(debug_color, vec4<f32>(atlas_coords.x, atlas_coords.y, 0.0, 1.0), 0.5);
+#endif
+
+    return FragmentData(world_normal, debug_color);
+}
+
+
+
+fn calculate_blend(world_position: vec4<f32>, view_config:TerrainViewConfig) -> Blend {
     let viewer_distance = distance(world_position.xyz, view.world_position.xyz);
     let log_distance = max(log2(2.0 * viewer_distance / view_config.blend_distance), 0.0);
     let ratio = (1.0 - log_distance % 1.0) / view_config.blend_range;
@@ -55,14 +159,14 @@ fn calculate_blend(world_position: vec4<f32>) -> Blend {
     return Blend(u32(log_distance), ratio);
 }
 
-fn calculate_morph(tile: Tile, world_position: vec4<f32>) -> f32 {
+fn calculate_morph(tile: Tile, world_position: vec4<f32>, view_config:TerrainViewConfig) -> f32 {
     let viewer_distance = distance(world_position.xyz, view.world_position.xyz);
     let morph_distance = view_config.morph_distance * f32(tile.size << 1u);
 
     return clamp(1.0 - (1.0 - viewer_distance / morph_distance) / view_config.morph_range, 0.0, 1.0);
 }
 
-fn calculate_grid_position(grid_index: u32) -> vec2<u32>{
+fn calculate_grid_position(grid_index: u32, view_config:TerrainViewConfig) -> vec2<u32>{
     // use first and last indices of the rows twice, to form degenerate triangles
     let row_index    = clamp(grid_index % view_config.vertices_per_row, 1u, view_config.vertices_per_row - 2u) - 1u;
     let column_index = grid_index / view_config.vertices_per_row;
@@ -70,7 +174,7 @@ fn calculate_grid_position(grid_index: u32) -> vec2<u32>{
     return vec2<u32>(column_index + (row_index & 1u), row_index >> 1u);
 }
 
-fn calculate_local_position(tile: Tile, grid_position: vec2<u32>) -> vec2<f32> {
+fn calculate_local_position(tile: Tile, grid_position: vec2<u32>, view_config:TerrainViewConfig) -> vec2<f32> {
     let size = f32(tile.size) * view_config.tile_scale;
 
     var local_position = (vec2<f32>(tile.coords) + vec2<f32>(grid_position) / view_config.grid_size) * size;

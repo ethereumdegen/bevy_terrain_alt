@@ -1,4 +1,7 @@
-#import bevy_terrain::types
+#import bevy_terrain::types TerrainViewConfig
+#import bevy_terrain::types TileList
+
+#import bevy_pbr::pbr_functions pbr_input_new
 
 // Customize your attachment offsets and scales here.
 // They are used to line up the uvs of adjacent nodes with a border size different from 0.
@@ -64,9 +67,8 @@ var array_sampler: sampler;
 #import bevy_pbr::shadows
 #import bevy_pbr::fog
 #import bevy_pbr::pbr_functions
-
-#import bevy_terrain::node
-#import bevy_terrain::functions
+ 
+#import bevy_terrain::functions FragmentInput
 #import bevy_terrain::debug
 
 // The terrain data required by your `fragment_color` function.

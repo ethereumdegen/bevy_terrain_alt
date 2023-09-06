@@ -1,4 +1,32 @@
 #define_import_path bevy_terrain::debug
+#import bevy_terrain::types TerrainConfig,TerrainViewConfig,Tile,TileList
+#import bevy_terrain::functions calculate_morph, minmax
+#import bevy_terrain::parameters Parameters
+
+// view bindings
+#import bevy_pbr::mesh_view_bindings view
+
+//view bindings
+@group(0) @binding(0)
+var<uniform> view_config: TerrainViewConfig;
+@group(0) @binding(1)
+var quadtree: texture_2d_array<u32>;
+@group(0) @binding(2)
+var<storage, read_write> final_tiles: TileList;
+@group(0) @binding(3)
+var<storage, read_write> temporary_tiles: TileList;
+@group(0) @binding(4)
+var<storage, read_write> parameters: Parameters;
+
+// terrain bindings
+@group(2) @binding(0)
+var<uniform> config: TerrainConfig;
+@group(2) @binding(1)
+var atlas_sampler: sampler;
+@group(2) @binding(2)
+var height_atlas: texture_2d_array<f32>;
+@group(2) @binding(3)
+var minmax_atlas: texture_2d_array<f32>;
 
 fn lod_color(lod: u32) -> vec4<f32> {
     if (lod % 6u == 0u) {
