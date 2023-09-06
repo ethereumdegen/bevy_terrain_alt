@@ -1,4 +1,4 @@
-#import bevy_terrain::types
+#import bevy_terrain::types TerrainViewConfig
 
 struct TerrainConfig {
     lod_count: u32,

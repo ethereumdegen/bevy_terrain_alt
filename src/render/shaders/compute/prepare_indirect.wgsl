@@ -1,4 +1,4 @@
-#import bevy_terrain::types
+#import bevy_terrain::types TerrainViewConfig TileList
 #import bevy_terrain::parameters
 
 struct IndirectBuffer {
