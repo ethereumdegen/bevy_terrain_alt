@@ -424,9 +424,10 @@ where
         
     }
 
+    //this may not be correct !! 
     fn finish(&self, app: &mut App) {
-        
-        if let Ok(render_app) = app.get_sub_app_mut(RenderApp) {
+        let mut render_app = app.get_sub_app_mut(RenderApp).unwrap();
+       // if let Ok(render_app) = app.get_sub_app_mut(RenderApp) {
             render_app
                 // .init_resource::<ExtractedMaterials<M>>()
                 // .init_resource::<RenderMaterials<M>>()
@@ -439,7 +440,7 @@ where
                 .init_resource::<TerrainRenderPipeline<M>>()
                 .init_resource::<SpecializedRenderPipelines<TerrainRenderPipeline<M>>>()
                 .add_systems(bevy::render::Render,queue_terrain::<M>.in_set(RenderSet::Queue));
-        }
+       // }
     }
 
 }
