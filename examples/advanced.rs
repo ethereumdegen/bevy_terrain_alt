@@ -1,9 +1,15 @@
+ 
+
 use bevy::{
     asset::LoadState,
     prelude::*,
     reflect::TypeUuid,
+    reflect::TypePath,
     render::{render_resource::*, texture::ImageSampler},
 };
+
+use bevy::{asset::ChangeWatcher,  utils::Duration};
+
 use bevy_terrain::prelude::*;
 
 const TERRAIN_SIZE: u32 = 1024;
@@ -14,7 +20,7 @@ const HEIGHT: f32 = 200.0;
 const NODE_ATLAS_SIZE: u32 = 100;
 const PATH: &str = "terrain";
 
-#[derive(TypePath,AsBindGroup, TypeUuid, Clone)]
+#[derive(TypePath,AsBindGroup, TypeUuid,  Clone)]
 #[uuid = "4ccc53dd-2cfd-48ba-b659-c0e1a9bc0bdb"]
 pub struct TerrainMaterial {
     #[texture(0, dimension = "2d_array")]
@@ -30,8 +36,9 @@ impl Material for TerrainMaterial {
 
 fn main() {
     App::new()
+        
         .add_plugins(DefaultPlugins.set(AssetPlugin {
-            watch_for_changes: true, // enable hot reloading for shader easy customization
+            watch_for_changes:ChangeWatcher::with_delay(Duration::from_millis(200)), // enable hot reloading for shader easy customization
             ..default()
         }))
         .add_plugins(TerrainPlugin {
