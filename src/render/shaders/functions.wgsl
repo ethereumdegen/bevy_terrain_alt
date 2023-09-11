@@ -13,6 +13,11 @@
 struct VertexInput {
     @builtin(instance_index) instance: u32,
     @builtin(vertex_index)   vertex_index: u32,
+     
+    @location(0) position: vec3<f32>,
+    @location(1) blend_color: vec4<f32>,
+    
+    
 }
 
 struct VertexOutput {
