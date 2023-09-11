@@ -6,6 +6,8 @@ const PARAMETERS_SHADER: HandleUntyped =
     HandleUntyped::weak_from_u64(Shader::TYPE_UUID, 656456784512075658);
 const NODE_SHADER: HandleUntyped =
     HandleUntyped::weak_from_u64(Shader::TYPE_UUID, 124345314345873273);
+const UNIFORMS_SHADER: HandleUntyped =
+    HandleUntyped::weak_from_u64(Shader::TYPE_UUID, 623345314345873272);
 const FUNCTIONS_SHADER: HandleUntyped =
     HandleUntyped::weak_from_u64(Shader::TYPE_UUID, 234313897973543254);
 const DEBUG_SHADER: HandleUntyped =
@@ -36,6 +38,10 @@ pub(crate) fn add_shader(app: &mut App) {
         Shader::from_wgsl(include_str!("compute/parameters.wgsl"),shader_path.clone()),
     );
     assets.set_untracked(NODE_SHADER, Shader::from_wgsl(include_str!("node.wgsl"),shader_path.clone()));
+    assets.set_untracked(
+        UNIFORMS_SHADER,
+        Shader::from_wgsl(include_str!("uniforms.wgsl"),shader_path.clone()),
+    );
     assets.set_untracked(
         FUNCTIONS_SHADER,
         Shader::from_wgsl(include_str!("functions.wgsl"),shader_path.clone()),

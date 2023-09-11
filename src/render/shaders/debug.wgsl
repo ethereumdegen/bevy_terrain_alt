@@ -65,7 +65,7 @@ fn show_tiles(tile: Tile, world_position: vec4<f32>) -> vec4<f32> {
     color = mix(color, lod_color(lod), 0.5);
 
 #ifdef MESH_MORPH
-    let morph = calculate_morph(tile, world_position);
+    let morph = calculate_morph(tile, world_position );
     color = color + vec4<f32>(1.0, 1.0, 1.0, 1.0) * morph;
 #endif
 
@@ -76,7 +76,7 @@ fn show_minmax_error(tile: Tile, height: f32) -> vec4<f32> {
     let size = f32(tile.size) * view_config.tile_scale;
     let local_position = (vec2<f32>(tile.coords) + 0.5) * size;
     let lod = u32(ceil(log2(size))) + 1u;
-    let minmax = minmax(local_position, size);
+    let minmax = minmax(local_position, size );
 
     var color = vec4<f32>(0.0,
                           clamp((minmax.y - height) / size / 2.0, 0.0, 1.0),

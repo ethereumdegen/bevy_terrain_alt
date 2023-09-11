@@ -1,26 +1,12 @@
 #define_import_path bevy_terrain::node
 #import bevy_terrain::types TerrainConfig, TerrainViewConfig,Tile, TileList
  
+ 
+ #import bevy_terrain::uniforms view_config, quadtree , tiles, config 
+ 
 #import bevy_pbr::mesh_view_bindings       view 
-
-// terrain view bindings
-@group(1) @binding(0)
-var<uniform> view_config: TerrainViewConfig;
-@group(1) @binding(1)
-var quadtree: texture_2d_array<u32>;
-@group(1) @binding(2)
-var<storage> tiles: TileList;
-
-// terrain bindings
-@group(2) @binding(0)
-var<uniform> config: TerrainConfig;
-@group(2) @binding(1)
-var atlas_sampler: sampler;
-@group(2) @binding(2)
-var height_atlas: texture_2d_array<f32>;
-@group(2) @binding(3)
-var minmax_atlas: texture_2d_array<f32>;
-
+ 
+ 
 
 // A lookup of a node inside the node atlas based on the view of a quadtree.
 struct NodeLookup {
@@ -39,7 +25,7 @@ fn node_size(lod: u32 ) -> f32 {
 
 // Looks up the best availale node in the node atlas from the viewers point of view.
 // This is done by sampling the viewers quadtree at the caluclated coordinate.
-fn lookup_node(lod: u32, local_position: vec2<f32> ) -> NodeLookup {
+fn lookup_node(lod: u32, local_position: vec2<f32>  ) -> NodeLookup {
 #ifdef SHOW_NODES
     var quadtree_lod = 0u;
     for (; quadtree_lod < config.lod_count; quadtree_lod = quadtree_lod + 1u) {
